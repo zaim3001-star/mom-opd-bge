@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14202E">
+<title>MOM Koordinasi OPD – AMM BGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --coal:#14202E; --coal2:#22324A; --yellow:#F2B705;
+  --paper:#F3F5F7; --card:#FFFFFF; --ink:#17212D; --muted:#5A6676; --line:#D9DFE6;
+  --ok:#2E8B4A; --prog:#C98500; --todo:#97A3B1; --late:#C4372C;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom)}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;letter-spacing:.01em}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+/* Header */
+.top{background:var(--coal);color:#fff;padding-top:env(safe-area-inset-top)}
+.top-in{max-width:1040px;margin:0 auto;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top h1{margin:0;font-size:clamp(22px,5vw,30px);font-weight:700;line-height:1.1}
+.site{margin:2px 0 0;color:#B9C4D2;font-size:14px}
+.hazard{height:6px;background:repeating-linear-gradient(135deg,var(--yellow) 0 14px,var(--coal) 14px 28px)}
+.btn-ghost{background:transparent;color:#fff;border:1px solid #4A5D75;border-radius:8px;padding:8px 12px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn-ghost:hover{border-color:var(--yellow)}
+.btn-ghost:disabled{opacity:.6;cursor:wait}
+
+/* Menu */
+.tabs{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.tabs-in{max-width:1040px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none;padding:0 8px}
+.tabs-in::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--yellow)}
+
+main{max-width:1040px;margin:0 auto;padding:16px 16px 56px}
+.banner{margin:0 0 14px;padding:10px 14px;border-radius:8px;background:#FFF4D1;color:#5A4300;font-size:14px;border:1px solid #F0D27A}
+.banner.err{background:#FBE3E1;color:#7A1F18;border-color:#E9A9A3}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+/* Ringkasan */
+.hero{background:var(--card);border:1px solid var(--line);border-left:8px solid var(--ok);border-radius:10px;padding:18px 18px 14px}
+.hero.telat{border-left-color:var(--late)}
+.hero h2{margin:0;font-size:clamp(28px,6.5vw,44px);line-height:1.05;font-weight:700}
+.hero p{margin:6px 0 0}
+.blok{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:16px}
+.blok h3{margin:0 0 10px;font-size:22px;line-height:1.2}
+.late-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.late-list li{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.late-list li.late{border-left:4px solid var(--late)}
+.late-list li.soon{border-left:4px solid var(--prog)}
+.late-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.late-days{font-weight:600;font-size:14px;white-space:nowrap}
+.late .late-days{color:var(--late)}
+.soon .late-days{color:#8A5B00}
+.late-list p{margin:2px 0 0}
+.pct{margin:0 0 8px;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:30px;font-weight:700;line-height:1}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:#E7EBEF}
+.bar.big{height:20px}
+.seg{height:100%}
+.ok{--c:var(--ok)} .prog{--c:var(--prog)} .todo{--c:var(--todo)} .late{--c:var(--late)}
+.seg{background:var(--c)}
+.legend{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
+.opd-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.opd-row:first-child{border-top:0;padding-top:0}
+.opd-name{font-weight:600;overflow-wrap:anywhere}
+.opd-val{font-size:14px;color:var(--muted);white-space:nowrap}
+@media (min-width:900px){
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+}
+
+/* Daftar tindak lanjut */
+.filters{display:grid;gap:8px}
+@media (min-width:760px){.filters{grid-template-columns:2fr 1fr 1fr 1.4fr auto}}
+input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{resize:vertical}
+.info{margin:12px 0 0}
+.tl-list,.rapat-list{list-style:none;margin:0;padding:0}
+.tl{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:12px 14px;margin-top:10px}
+.tl-head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.badge{font-size:13px;font-weight:600;padding:2px 9px;border-radius:999px;color:#fff;background:var(--c)}
+.badge.todo{background:#6E7B8B}
+.badge.prog{background:#A86F00}
+.tl-opd{font-weight:600}
+.tl-date{margin-left:auto;font-size:14px;color:var(--muted)}
+.tl-uraian{margin:6px 0 2px;font-size:17px}
+.tl-meta{margin:2px 0;font-size:14px;color:var(--muted)}
+.tl-note{margin:6px 0 0;font-size:14px;padding:6px 10px;background:var(--paper);border-radius:6px}
+.kosong{background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--muted);margin-top:10px}
+
+/* Rapat */
+.rapat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:10px}
+.rapat-date{margin:0;font-size:14px;font-weight:600;color:var(--muted)}
+.rapat h3{margin:2px 0 4px;font-size:21px}
+.rapat .bar{margin-top:10px}
+.rapat-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+/* Tombol & form */
+.btn{background:var(--coal);color:#fff;border:0;border-radius:8px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--coal2)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+.btn-sec:hover{border-color:var(--coal)}
+.tl .btn-sec{margin-top:10px}
+.form-grid{display:grid;gap:12px}
+@media (min-width:700px){.form-grid{grid-template-columns:1fr 1fr}.full{grid-column:1/-1}}
+label{display:grid;gap:4px;font-weight:600;font-size:14px}
+label .opt{font-weight:400;color:var(--muted)}
+.form-act{display:flex;justify-content:flex-end}
+.hint{margin:0 0 12px;font-size:14px;color:var(--muted)}
+
+dialog{border:0;border-radius:12px;padding:0;width:min(480px,calc(100% - 32px));color:var(--ink)}
+dialog::backdrop{background:rgba(20,32,46,.55)}
+dialog form{padding:20px;display:grid;gap:12px}
+dialog h3{margin:0;font-size:24px}
+dialog p{margin:0}
+.dlg-act{display:flex;justify-content:flex-end;gap:8px}
+
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--coal);color:#fff;padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);z-index:20}
+.toast.show{opacity:1}
+.toast.err{background:var(--late)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div>
+      <h1>MOM Koordinasi OPD</h1>
+      <p class="site">PT.AMM Site Bengalon East Project</p>
+    </div>
+    <button id="btnMuat" class="btn-ghost" type="button">Muat ulang</button>
+  </div>
+  <div class="hazard" aria-hidden="true"></div>
+</header>
+
+<nav class="tabs" aria-label="Menu">
+  <div class="tabs-in" role="tablist">
+    <button type="button" role="tab" data-tab="ringkasan" aria-selected="true">Ringkasan</button>
+    <button type="button" role="tab" data-tab="tl" aria-selected="false">Tindak lanjut</button>
+    <button type="button" role="tab" data-tab="rapat" aria-selected="false">Rapat</button>
+    <button type="button" role="tab" data-tab="tambah" aria-selected="false">Tambah data</button>
+  </div>
+</nav>
+
+<main>
+  <div id="banner" class="banner" role="status" hidden></div>
+
+  <!-- RINGKASAN -->
+  <section id="tab-ringkasan" class="panel">
+    <div id="hero" class="hero">
+      <h2 id="heroJudul">Memuat data…</h2>
+      <p id="heroSub" class="muted small"></p>
+    </div>
+    <div class="grid2">
+      <div class="blok">
+        <h3>Lewat tenggat dan jatuh tempo 7 hari</h3>
+        <ul id="listPerhatian" class="late-list"></ul>
+      </div>
+      <div>
+        <div class="blok">
+          <h3>Penyelesaian</h3>
+          <p id="pctTotal" class="pct"></p>
+          <div id="barTotal"></div>
+          <ul id="legend" class="legend"></ul>
+        </div>
+        <div class="blok">
+          <h3>Per OPD</h3>
+          <div id="perOpd"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TINDAK LANJUT -->
+  <section id="tab-tl" class="panel" hidden>
+    <div class="filters">
+      <input id="fCari" type="search" placeholder="Cari uraian, PIC, atau catatan" aria-label="Cari">
+      <select id="fOpd" aria-label="Filter OPD"></select>
+      <select id="fStatus" aria-label="Filter status">
+        <option value="">Semua status</option>
+        <option>Terlambat</option><option>Belum</option><option>Proses</option><option>Selesai</option>
+      </select>
+      <select id="fRapat" aria-label="Filter rapat"></select>
+      <button id="btnReset" class="btn-sec" type="button">Hapus filter</button>
+    </div>
+    <p id="tlInfo" class="info muted small"></p>
+    <ul id="tlList" class="tl-list"></ul>
+  </section>
+
+  <!-- RAPAT -->
+  <section id="tab-rapat" class="panel" hidden>
+    <ul id="rapatList" class="rapat-list"></ul>
+  </section>
+
+  <!-- TAMBAH DATA -->
+  <section id="tab-tambah" class="panel" hidden>
+    <div class="blok" style="margin-top:0">
+      <h3>Tindak lanjut baru</h3>
+      <p id="hintTl" class="hint"></p>
+      <form id="formTl" class="form-grid">
+        <label class="full">Dari rapat
+          <select name="ID_Rapat" id="inRapat" required></select>
+        </label>
+        <label class="full">Uraian tindak lanjut
+          <textarea name="Uraian" rows="2" required maxlength="1000"></textarea>
+        </label>
+        <label>OPD
+          <input name="OPD" list="dlOpd" required maxlength="100" placeholder="Contoh: DLH">
+          <datalist id="dlOpd"></datalist>
+        </label>
+        <label>PIC perusahaan <span class="opt">(opsional)</span>
+          <input name="PIC" maxlength="100" placeholder="Contoh: HSE Dept">
+        </label>
+        <label>Tenggat
+          <input name="Tenggat" type="date" required>
+        </label>
+        <label>Status
+          <select name="Status"><option>Belum</option><option>Proses</option><option>Selesai</option></select>
+        </label>
+        <label class="full">Catatan <span class="opt">(opsional)</span>
+          <textarea name="Catatan" rows="2" maxlength="1000"></textarea>
+        </label>
+        <div class="full form-act"><button class="btn" type="submit">Simpan tindak lanjut</button></div>
+      </form>
+    </div>
+
+    <div class="blok">
+      <h3>Rapat baru</h3>
+      <form id="formRapat" class="form-grid">
+        <label>Tanggal rapat
+          <input name="Tanggal" type="date" required>
+        </label>
+        <label>Tempat <span class="opt">(opsional)</span>
+          <input name="Tempat" maxlength="200">
+        </label>
+        <label class="full">Judul rapat
+          <input name="Judul" required maxlength="200" placeholder="Contoh: Rapat Koordinasi OPD Desember 2026">
+        </label>
+        <label>Pimpinan rapat <span class="opt">(opsional)</span>
+          <input name="Pimpinan" maxlength="100">
+        </label>
+        <label>OPD peserta <span class="opt">(opsional)</span>
+          <input name="Peserta_OPD" maxlength="300" placeholder="Contoh: DLH, Dishub">
+        </label>
+        <label class="full">Link notulen <span class="opt">(opsional, misal Google Drive)</span>
+          <input name="Link_Notulen" type="url" maxlength="500" placeholder="https://">
+        </label>
+        <div class="full form-act"><button class="btn" type="submit">Simpan rapat</button></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- Dialog ubah status -->
+<dialog id="dlgUbah">
+  <form id="formUbah">
+    <h3>Ubah status</h3>
+    <p id="ubahUraian" class="muted small"></p>
+    <label>Status
+      <select id="ubahStatus"><option>Belum</option><option>Proses</option><option>Selesai</option></select>
+    </label>
+    <label>Catatan <span class="opt">(opsional)</span>
+      <textarea id="ubahCatatan" rows="3" maxlength="1000"></textarea>
+    </label>
+    <div class="dlg-act">
+      <button type="button" id="btnBatal" class="btn-sec">Batal</button>
+      <button type="submit" class="btn">Simpan status</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Dialog PIN -->
+<dialog id="dlgPin">
+  <form id="formPin">
+    <h3>Masukkan PIN</h3>
+    <p id="pinPesan" class="muted small"></p>
+    <label>PIN akses
+      <input id="inPin" type="password" autocomplete="current-password" required>
+    </label>
+    <div class="dlg-act"><button type="submit" class="btn">Masuk</button></div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ================= PENGATURAN =================
+   Tempel URL Web App Apps Script di antara tanda kutip.
+   Jika dibiarkan kosong, website berjalan dalam mode contoh. */
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycby0nJ-s7YBRw5CnzEFm8XLbvaxVD97IJl1rvkTGLiTx4WzeEHXUfQMakGP5A1PR2IdDXQ/exec"
+};
+/* ============================================== */
+
+const DEMO = !CONFIG.API_URL;
+const BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const URUT = ["Selesai","Proses","Belum","Terlambat"];
+const KELAS = { Selesai:"ok", Proses:"prog", Belum:"todo", Terlambat:"late" };
+
+let DATA = { rapat: [], tl: [] };
+let PIN = "";
+let editId = null;
+try { PIN = localStorage.getItem("mom_pin") || ""; } catch (e) {}
+
+const $ = (s) => document.querySelector(s);
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function simpanPin(p) { try { p ? localStorage.setItem("mom_pin", p) : localStorage.removeItem("mom_pin"); } catch (e) {} }
+
+/* ---------- Tanggal & status ---------- */
+function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function hariIni() { return iso(new Date()); }
+function tglStr(s) { return String(s || "").slice(0, 10); }
+function fmtTgl(s) {
+  const p = tglStr(s).split("-");
+  if (p.length < 3 || !p[2]) return "-";
+  return Number(p[2]) + " " + BULAN[Number(p[1]) - 1] + " " + p[0];
+}
+function selisih(a, b) { return Math.round((new Date(a + "T00:00:00") - new Date(b + "T00:00:00")) / 86400000); }
+function statusEf(t) {
+  if (t.Status === "Selesai") return "Selesai";
+  if (t.Tenggat && tglStr(t.Tenggat) < hariIni()) return "Terlambat";
+  return t.Status === "Proses" ? "Proses" : "Belum";
+}
+function hitung(list) {
+  const c = { Selesai: 0, Proses: 0, Belum: 0, Terlambat: 0 };
+  list.forEach(t => c[statusEf(t)]++);
+  return c;
+}
+function bar(c, total, big) {
+  const b = el("div", "bar" + (big ? " big" : ""));
+  b.setAttribute("role", "img");
+  b.setAttribute("aria-label", URUT.map(k => k + " " + c[k]).join(", "));
+  if (!total) return b;
+  URUT.forEach(k => {
+    if (!c[k]) return;
+    const s = el("span", "seg " + KELAS[k]);
+    s.style.width = (c[k] / total * 100) + "%";
+    s.title = k + ": " + c[k];
+    b.appendChild(s);
+  });
+  return b;
+}
+
+/* ---------- Data contoh (mode demo) ---------- */
+function demoData() {
+  return {
+    rapat: [
+      { ID_Rapat:"R-001", Tanggal:"2026-09-08", Judul:"Rapat Koordinasi OPD September 2026", Tempat:"Ruang Rapat Site BGE", Pimpinan:"Project Manager", Peserta_OPD:"DLH, Dishub, Disnakertrans", Link_Notulen:"" },
+      { ID_Rapat:"R-002", Tanggal:"2026-10-06", Judul:"Rapat Koordinasi OPD Oktober 2026", Tempat:"Kantor Bupati", Pimpinan:"Project Manager", Peserta_OPD:"PUPR, Bappeda, BPBD", Link_Notulen:"" },
+      { ID_Rapat:"R-003", Tanggal:"2026-11-03", Judul:"Rapat Koordinasi OPD November 2026", Tempat:"Ruang Rapat Site BGE", Pimpinan:"Deputy PM", Peserta_OPD:"DLH, Dishub", Link_Notulen:"" }
+    ],
+    tl: [
+      { ID_TL:"TL-001", ID_Rapat:"R-001", Uraian:"Penyampaian laporan RKL-RPL semester I", OPD:"DLH", PIC:"HSE Dept", Tenggat:"2026-09-30", Status:"Selesai", Tgl_Selesai:"2026-09-25", Catatan:"" },
+      { ID_TL:"TL-002", ID_Rapat:"R-001", Uraian:"Pemasangan rambu lalu lintas jalan hauling KM 12", OPD:"Dishub", PIC:"Operation Dept", Tenggat:"2026-10-15", Status:"Selesai", Tgl_Selesai:"2026-10-12", Catatan:"" },
+      { ID_TL:"TL-003", ID_Rapat:"R-001", Uraian:"Penyampaian data rekrutmen tenaga kerja lokal", OPD:"Disnakertrans", PIC:"HR Dept", Tenggat:"2026-10-10", Status:"Proses", Tgl_Selesai:"", Catatan:"Menunggu data dari kontraktor" },
+      { ID_TL:"TL-004", ID_Rapat:"R-002", Uraian:"Perbaikan drainase jalan desa terdampak", OPD:"PUPR", PIC:"Engineering", Tenggat:"2026-11-30", Status:"Proses", Tgl_Selesai:"", Catatan:"" },
+      { ID_TL:"TL-005", ID_Rapat:"R-002", Uraian:"Sinkronisasi program CSR dengan RKPD", OPD:"Bappeda", PIC:"ComDev", Tenggat:"2026-12-15", Status:"Belum", Tgl_Selesai:"", Catatan:"" },
+      { ID_TL:"TL-006", ID_Rapat:"R-002", Uraian:"Simulasi tanggap darurat banjir bersama", OPD:"BPBD", PIC:"HSE Dept", Tenggat:"2026-11-20", Status:"Belum", Tgl_Selesai:"", Catatan:"" },
+      { ID_TL:"TL-007", ID_Rapat:"R-003", Uraian:"Uji kualitas air sungai di titik outlet", OPD:"DLH", PIC:"Environment", Tenggat:"2026-12-05", Status:"Proses", Tgl_Selesai:"", Catatan:"" },
+      { ID_TL:"TL-008", ID_Rapat:"R-003", Uraian:"Izin penggunaan jalan umum untuk mobilisasi alat", OPD:"Dishub", PIC:"Logistik", Tenggat:"2026-12-10", Status:"Belum", Tgl_Selesai:"", Catatan:"" }
+    ]
+  };
+}
+function idBaru(list, key, prefix) {
+  let max = 0;
+  list.forEach(x => { const m = String(x[key]).match(/(\d+)$/); if (m) max = Math.max(max, Number(m[1])); });
+  return prefix + String(max + 1).padStart(3, "0");
+}
+function demoKirim(action, d) {
+  const now = hariIni();
+  if (action === "tambahRapat") {
+    DATA.rapat.push({ ID_Rapat: idBaru(DATA.rapat, "ID_Rapat", "R-"), Tanggal: d.Tanggal, Judul: d.Judul, Tempat: d.Tempat, Pimpinan: d.Pimpinan, Peserta_OPD: d.Peserta_OPD, Link_Notulen: d.Link_Notulen });
+  } else if (action === "tambahTL") {
+    const s = d.Status || "Belum";
+    DATA.tl.push({ ID_TL: idBaru(DATA.tl, "ID_TL", "TL-"), ID_Rapat: d.ID_Rapat, Uraian: d.Uraian, OPD: d.OPD, PIC: d.PIC, Tenggat: d.Tenggat, Status: s, Tgl_Selesai: s === "Selesai" ? now : "", Catatan: d.Catatan });
+  } else if (action === "ubahTL") {
+    const t = DATA.tl.find(x => x.ID_TL === d.ID_TL);
+    if (!t) throw new Error("Tindak lanjut tidak ditemukan");
+    t.Status = d.Status;
+    t.Tgl_Selesai = d.Status === "Selesai" ? (t.Tgl_Selesai || now) : "";
+    t.Catatan = d.Catatan;
+  }
+  return { ok: true };
+}
+
+/* ---------- Komunikasi dengan Apps Script ---------- */
+function setBanner(teks, err) {
+  const b = $("#banner");
+  b.hidden = !teks;
+  b.textContent = teks || "";
+  b.classList.toggle("err", !!err);
+}
+function setLoading(on) {
+  const b = $("#btnMuat");
+  b.disabled = on;
+  b.textContent = on ? "Memuat…" : "Muat ulang";
+}
+async function muat() {
+  if (DEMO) {
+    setBanner("Mode contoh: website belum tersambung ke Google Sheets. Isi API_URL di file index.html. Perubahan di mode ini tidak tersimpan.");
+    if (!DATA.rapat.length) DATA = demoData();
+    render();
+    return;
+  }
+  if (!PIN) { mintaPin(); return; }
+  setLoading(true);
+  try {
+    const r = await fetch(CONFIG.API_URL + "?pin=" + encodeURIComponent(PIN));
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "Gagal memuat data");
+    DATA = { rapat: j.rapat || [], tl: j.tl || [] };
+    setBanner("");
+    render();
+  } catch (err) {
+    if (/PIN/i.test(err.message)) {
+      PIN = ""; simpanPin("");
+      mintaPin("PIN salah. Masukkan PIN yang benar.");
+    } else {
+      setBanner("Data tidak bisa dimuat (" + err.message + "). Periksa koneksi internet, lalu tekan Muat ulang.", true);
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+async function kirim(action, data) {
+  if (DEMO) return demoKirim(action, data);
+  const r = await fetch(CONFIG.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ pin: PIN, action: action, data: data })
+  });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || "Gagal menyimpan");
+  return j;
+}
+
+/* ---------- Tampilan ---------- */
+function render() {
+  isiPilihan();
+  renderRingkasan();
+  renderTl();
+  renderRapat();
+}
+
+function isiPilihan() {
+  const opds = [...new Set(DATA.tl.map(t => t.OPD).filter(Boolean))].sort();
+  setOptions($("#fOpd"), opds.map(o => [o, o]), "Semua OPD");
+  const rap = [...DATA.rapat]
+    .sort((a, b) => tglStr(b.Tanggal).localeCompare(tglStr(a.Tanggal)))
+    .map(r => [r.ID_Rapat, fmtTgl(r.Tanggal) + " – " + (r.Judul || "")]);
+  setOptions($("#fRapat"), rap, "Semua rapat");
+  setOptions($("#inRapat"), rap, null);
+  $("#hintTl").textContent = rap.length ? "" : "Belum ada rapat. Simpan rapat baru di bawah dulu, lalu tambahkan tindak lanjutnya.";
+  const dl = $("#dlOpd");
+  dl.textContent = "";
+  opds.forEach(o => { const op = document.createElement("option"); op.value = o; dl.appendChild(op); });
+}
+function setOptions(sel, pairs, semua) {
+  const lama = sel.value;
+  sel.textContent = "";
+  if (semua) { const o = el("option", null, semua); o.value = ""; sel.appendChild(o); }
+  pairs.forEach(([v, t]) => { const o = el("option", null, t); o.value = v; sel.appendChild(o); });
+  if ([...sel.options].some(o => o.value === lama)) sel.value = lama;
+}
+
+function renderRingkasan() {
+  const tl = DATA.tl;
+  const total = tl.length;
+  const c = hitung(tl);
+  const today = hariIni();
+
+  const hero = $("#hero");
+  const h = $("#heroJudul");
+  hero.classList.toggle("telat", c.Terlambat > 0);
+  if (!total) h.textContent = "Belum ada tindak lanjut tercatat";
+  else if (c.Terlambat) h.textContent = c.Terlambat + " tindak lanjut melewati tenggat";
+  else h.textContent = "Semua tindak lanjut masih dalam tenggat";
+  $("#heroSub").textContent = "Data per " + fmtTgl(today) + ", dari " + DATA.rapat.length + " rapat dan " + total + " tindak lanjut.";
+
+  // Lewat tenggat + jatuh tempo 7 hari
+  const ul = $("#listPerhatian");
+  ul.textContent = "";
+  const perlu = tl.filter(t => {
+    const s = statusEf(t);
+    if (s === "Terlambat") return true;
+    if (s === "Selesai" || !t.Tenggat) return false;
+    const sisa = selisih(tglStr(t.Tenggat), today);
+    return sisa >= 0 && sisa <= 7;
+  }).sort((a, b) => tglStr(a.Tenggat).localeCompare(tglStr(b.Tenggat)));
+  if (!perlu.length) {
+    ul.appendChild(el("li", "", "Tidak ada yang lewat tenggat atau jatuh tempo minggu ini."));
+  }
+  perlu.forEach(t => {
+    const telat = statusEf(t) === "Terlambat";
+    const n = Math.abs(selisih(tglStr(t.Tenggat), today));
+    const ket = telat ? n + " hari lewat" : (n === 0 ? "Hari ini" : n + " hari lagi");
+    const li = el("li", telat ? "late" : "soon");
+    const top = el("div", "late-top");
+    top.append(el("strong", null, t.OPD || "-"), el("span", "late-days", ket));
+    li.append(top, el("p", null, t.Uraian || ""),
+      el("p", "muted small", "Tenggat " + fmtTgl(t.Tenggat) + (t.PIC ? ", PIC " + t.PIC : "")));
+    ul.appendChild(li);
+  });
+
+  // Penyelesaian keseluruhan
+  $("#pctTotal").textContent = (total ? Math.round(c.Selesai / total * 100) : 0) + "% selesai";
+  const wrap = $("#barTotal");
+  wrap.textContent = "";
+  wrap.appendChild(bar(c, total, true));
+  const lg = $("#legend");
+  lg.textContent = "";
+  URUT.forEach(k => {
+    const li = el("li", KELAS[k]);
+    li.append(el("span", "sw"), document.createTextNode(k + " " + c[k]));
+    lg.appendChild(li);
+  });
+
+  // Per OPD
+  const box = $("#perOpd");
+  box.textContent = "";
+  const per = {};
+  tl.forEach(t => { const k = t.OPD || "Tanpa OPD"; (per[k] = per[k] || []).push(t); });
+  const rows = Object.entries(per).sort((a, b) =>
+    hitung(b[1]).Terlambat - hitung(a[1]).Terlambat || b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  if (!rows.length) box.appendChild(el("p", "muted small", "Belum ada data."));
+  rows.forEach(([opd, list]) => {
+    const cc = hitung(list);
+    const r = el("div", "opd-row");
+    r.append(el("span", "opd-name", opd), bar(cc, list.length),
+      el("span", "opd-val", cc.Selesai + "/" + list.length + " selesai"));
+    box.appendChild(r);
+  });
+}
+
+function renderTl() {
+  const q = $("#fCari").value.trim().toLowerCase();
+  const fo = $("#fOpd").value, fs = $("#fStatus").value, fr = $("#fRapat").value;
+  const mapR = Object.fromEntries(DATA.rapat.map(r => [r.ID_Rapat, r]));
+  const urutS = { Terlambat: 0, Proses: 1, Belum: 2, Selesai: 3 };
+  const list = DATA.tl.filter(t =>
+    (!fo || t.OPD === fo) && (!fs || statusEf(t) === fs) && (!fr || t.ID_Rapat === fr) &&
+    (!q || [t.Uraian, t.PIC, t.OPD, t.Catatan].join(" ").toLowerCase().includes(q))
+  ).sort((a, b) => urutS[statusEf(a)] - urutS[statusEf(b)] || tglStr(a.Tenggat).localeCompare(tglStr(b.Tenggat)));
+
+  $("#tlInfo").textContent = "Menampilkan " + list.length + " dari " + DATA.tl.length + " tindak lanjut";
+  const ul = $("#tlList");
+  ul.textContent = "";
+  if (!list.length) {
+    ul.appendChild(el("li", "kosong", "Tidak ada tindak lanjut yang cocok. Ubah filter, atau tambahkan lewat menu Tambah data."));
+    return;
+  }
+  list.forEach(t => {
+    const s = statusEf(t);
+    const li = el("li", "tl " + KELAS[s]);
+    const head = el("div", "tl-head");
+    head.append(el("span", "badge " + KELAS[s], s), el("span", "tl-opd", t.OPD || "-"),
+      el("span", "tl-date", "Tenggat " + fmtTgl(t.Tenggat)));
+    li.append(head, el("p", "tl-uraian", t.Uraian || ""));
+    const meta = [];
+    if (t.PIC) meta.push("PIC: " + t.PIC);
+    const r = mapR[t.ID_Rapat];
+    if (r) meta.push("Rapat: " + r.Judul);
+    if (s === "Selesai" && t.Tgl_Selesai) meta.push("Selesai " + fmtTgl(t.Tgl_Selesai));
+    if (meta.length) li.appendChild(el("p", "tl-meta", meta.join("; ")));
+    if (t.Catatan) li.appendChild(el("p", "tl-note", t.Catatan));
+    const b = el("button", "btn-sec", "Ubah status");
+    b.type = "button";
+    b.addEventListener("click", () => bukaUbah(t));
+    li.appendChild(b);
+    ul.appendChild(li);
+  });
+}
+
+function renderRapat() {
+  const ul = $("#rapatList");
+  ul.textContent = "";
+  const list = [...DATA.rapat].sort((a, b) => tglStr(b.Tanggal).localeCompare(tglStr(a.Tanggal)));
+  if (!list.length) {
+    ul.appendChild(el("li", "kosong", "Belum ada rapat. Tambahkan lewat menu Tambah data."));
+    return;
+  }
+  list.forEach(r => {
+    const tl = DATA.tl.filter(t => t.ID_Rapat === r.ID_Rapat);
+    const c = hitung(tl);
+    const li = el("li", "rapat");
+    li.append(el("p", "rapat-date", fmtTgl(r.Tanggal)), el("h3", null, r.Judul || "-"));
+    const info = [r.Tempat, r.Pimpinan ? "Pimpinan: " + r.Pimpinan : "", r.Peserta_OPD ? "Peserta: " + r.Peserta_OPD : ""].filter(Boolean).join("; ");
+    if (info) li.appendChild(el("p", "muted small", info));
+    li.appendChild(bar(c, tl.length));
+    li.appendChild(el("p", "small", tl.length
+      ? c.Selesai + " dari " + tl.length + " tindak lanjut selesai" + (c.Terlambat ? ", " + c.Terlambat + " terlambat" : "")
+      : "Belum ada tindak lanjut"));
+    const act = el("div", "rapat-act");
+    const b = el("button", "btn-sec", "Lihat tindak lanjut");
+    b.type = "button";
+    b.addEventListener("click", () => { $("#fRapat").value = r.ID_Rapat; renderTl(); pindahTab("tl"); });
+    act.appendChild(b);
+    const link = String(r.Link_Notulen || "");
+    if (/^https?:\/\//i.test(link)) {
+      const a = el("a", "btn-sec", "Buka notulen");
+      a.href = link; a.target = "_blank"; a.rel = "noopener noreferrer";
+      act.appendChild(a);
+    }
+    li.appendChild(act);
+    ul.appendChild(li);
+  });
+}
+
+/* ---------- Menu ---------- */
+const TABS = ["ringkasan", "tl", "rapat", "tambah"];
+function pindahTab(id) {
+  if (!TABS.includes(id)) id = "ringkasan";
+  document.querySelectorAll(".tabs [role=tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
+  document.querySelectorAll(".panel").forEach(p => { p.hidden = p.id !== "tab-" + id; });
+  if (location.hash !== "#" + id) { try { history.replaceState(null, "", "#" + id); } catch (e) {} }
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".tabs [role=tab]").forEach(b => b.addEventListener("click", () => pindahTab(b.dataset.tab)));
+window.addEventListener("hashchange", () => pindahTab(location.hash.slice(1)));
+
+/* ---------- Toast ---------- */
+let toastT;
+function toast(pesan, err) {
+  const t = $("#toast");
+  t.textContent = pesan;
+  t.classList.toggle("err", !!err);
+  t.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+/* ---------- Form ---------- */
+async function simpanForm(form, action, pesan) {
+  const btn = form.querySelector("button[type=submit]");
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Menyimpan…";
+  try {
+    await kirim(action, Object.fromEntries(new FormData(form)));
+    form.reset();
+    isiTanggalDefault();
+    toast(pesan);
+    await muat();
+  } catch (err) {
+    toast("Gagal menyimpan: " + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+$("#formRapat").addEventListener("submit", e => { e.preventDefault(); simpanForm(e.target, "tambahRapat", "Rapat tersimpan"); });
+$("#formTl").addEventListener("submit", e => { e.preventDefault(); simpanForm(e.target, "tambahTL", "Tindak lanjut tersimpan"); });
+function isiTanggalDefault() {
+  const tgl = $("#formRapat").elements.Tanggal;
+  if (!tgl.value) tgl.value = hariIni();
+}
+
+function bukaUbah(t) {
+  editId = t.ID_TL;
+  $("#ubahUraian").textContent = (t.OPD ? t.OPD + ": " : "") + (t.Uraian || "");
+  $("#ubahStatus").value = t.Status || "Belum";
+  $("#ubahCatatan").value = t.Catatan || "";
+  $("#dlgUbah").showModal();
+}
+$("#btnBatal").addEventListener("click", () => $("#dlgUbah").close());
+$("#formUbah").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true;
+  try {
+    await kirim("ubahTL", { ID_TL: editId, Status: $("#ubahStatus").value, Catatan: $("#ubahCatatan").value });
+    $("#dlgUbah").close();
+    toast("Status tersimpan");
+    await muat();
+  } catch (err) {
+    toast("Gagal menyimpan: " + err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function mintaPin(pesan) {
+  $("#pinPesan").textContent = pesan || "Masukkan PIN akses yang diberikan admin.";
+  $("#inPin").value = "";
+  if (!$("#dlgPin").open) $("#dlgPin").showModal();
+}
+$("#formPin").addEventListener("submit", e => {
+  e.preventDefault();
+  PIN = $("#inPin").value.trim();
+  simpanPin(PIN);
+  $("#dlgPin").close();
+  muat();
+});
+$("#dlgPin").addEventListener("cancel", () => setBanner("PIN belum dimasukkan. Tekan Muat ulang untuk memasukkan PIN.", true));
+
+/* ---------- Filter & mulai ---------- */
+["#fCari", "#fOpd", "#fStatus", "#fRapat"].forEach(s => $(s).addEventListener("input", renderTl));
+$("#btnReset").addEventListener("click", () => {
+  $("#fCari").value = ""; $("#fOpd").value = ""; $("#fStatus").value = ""; $("#fRapat").value = "";
+  renderTl();
+});
+$("#btnMuat").addEventListener("click", () => muat());
+
+pindahTab(location.hash.slice(1) || "ringkasan");
+isiTanggalDefault();
+muat();
+</script>
+</body>
+</html>
